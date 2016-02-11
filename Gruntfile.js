@@ -18,13 +18,24 @@ module.exports = function (grunt) {
                 files: ['styles/*.css'],
                 tasks: ['csslint']
             }
+        },
+        babel: {
+            options: {
+                sourceMap: true
+            },
+            dist: {
+                files: {
+                    'dist/app.js': 'src/app.jsx'
+                }
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-csslint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-eslint');
+    grunt.loadNpmTasks('grunt-babel');
 
     grunt.registerTask('check', ['eslint', 'csslint']);
-    grunt.registerTask('default', ['check']);
+    grunt.registerTask('default', ['babel', 'check']);
 };
