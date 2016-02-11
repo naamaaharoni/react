@@ -24,9 +24,15 @@ module.exports = function (grunt) {
                 sourceMap: true
             },
             dist: {
-                files: {
-                    'dist/app.js': 'src/app.jsx'
-                }
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'src/',
+                        src: ['*.jsx'],
+                        dest: 'dist/',
+                        ext: '.js'
+                    }
+                ]
             }
         }
     });
