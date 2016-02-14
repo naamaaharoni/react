@@ -28,13 +28,33 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
     ReactDOM.render(elem, root);
 
     //Ex3
-    var data = ['Hello', 'there', 'world'];
+    var data = ['Hello', 'there', 'world!'];
     root = document.getElementById('ex3');
     elem = <ul>{
-        data.map(function (elem) {
-            return <li>{elem}</li>
+        data.map(function (elem, index) {
+            return <li key={index}>{elem}</li>
         })
     }</ul>;
     ReactDOM.render(elem, root);
+
+    //ex4
+    root = document.getElementById('ex4');
+    var List = React.createClass({
+        render: function () {
+            return <ul>{
+                _.map(this.props.items,function(item, index){
+                    return <ListItem item={item} key={index}></ListItem>
+                })
+            }</ul>;
+        }
+    });
+    var ListItem = React.createClass({
+        render: function () {
+            return <li>{this.props.item}</li>
+        }
+    });
+    ReactDOM.render(React.createElement(List, {
+        items: data
+    }), root);
 
 });
