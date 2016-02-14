@@ -20,6 +20,21 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
 
     //Ex2
     root = document.getElementById('ex2');
-    elem = <ul><li>Hello</li><li>there</li><li>example</li></ul>;
+    elem = <ul>
+        <li>Hello</li>
+        <li>there</li>
+        <li>example</li>
+    </ul>;
     ReactDOM.render(elem, root);
+
+    //Ex3
+    var data = ['Hello', 'there', 'world'];
+    root = document.getElementById('ex3');
+    elem = <ul>{
+        data.map(function (elem) {
+            return <li>{elem}</li>
+        })
+    }</ul>;
+    ReactDOM.render(elem, root);
+
 });
