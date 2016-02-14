@@ -8,8 +8,18 @@ requirejs.config({
 });
 
 requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
-    ReactDOM.render(
-    <h1>Hello, world!</h1>,
-        document.getElementById('example')
-    );
+
+    //Ex1
+    var root = document.getElementById('ex1');
+    var elem = React.createElement('ul', null,
+        // Element content instead of string content:
+        React.createElement('li', null, 'hello'),
+        React.createElement('li', null, 'there'),
+        React.createElement('li', null, 'world'));
+    ReactDOM.render(elem, root);
+
+    //Ex2
+    root = document.getElementById('ex2');
+    elem = <ul><li>Hello</li><li>there</li><li>example</li></ul>;
+    ReactDOM.render(elem, root);
 });

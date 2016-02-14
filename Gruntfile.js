@@ -43,5 +43,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-babel');
 
     grunt.registerTask('check', ['eslint', 'csslint']);
-    grunt.registerTask('default', ['babel', 'check']);
+    grunt.registerTask('default', ['babel']);
 };
