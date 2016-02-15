@@ -57,7 +57,7 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
             return (
                 <div>
                     <span>Task:</span>
-                    <input ref="input" type="text" value={this.props.text} onChange={this.onChange}/>
+                    <input type="text" value={this.props.text} onChange={this.onChange}/>
                     <button onClick={this.props.addTask}>Add</button>
                 </div>);
         }
@@ -83,14 +83,14 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
             }
         },
         onTaskClick(){
-           this.setState({
-               isChecked: !this.state.isChecked
-           });
+            this.setState({
+                isChecked: !this.state.isChecked
+            });
         },
         render(){
             var style = this.state.isChecked ? 'line-through' : '';
             return (
-                <li onClick={this.onTaskClick} ref="task" style={{textDecoration : style}}>
+                <li onClick={this.onTaskClick} style={{textDecoration : style}}>
                     {this.props.task.title}
                 </li>);
         }
