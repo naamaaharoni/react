@@ -11,8 +11,8 @@ requirejs.config({
 
 requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
 
-    //ex7
-    var root = document.getElementById('ex7');
+    //ex8
+    var root = document.getElementById('main');
     var App = React.createClass({
         getInitialState: function () {
             return {
