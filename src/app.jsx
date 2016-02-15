@@ -11,56 +11,90 @@ requirejs.config({
 
 requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
 
-    //ex7
-    var root = document.getElementById('ex7');
+    var root = document.getElementById('main');
     var App = React.createClass({
-        getInitialState: function () {
+        getInitialState() {
             return {
                 text: '',
-                fontWeight: 'normal',
-                fontStyle: 'normal'
+                tasks: []
             }
         },
-        updateText: function (newStr) {
+        addTask() {
+            var tasks = this.state.tasks.concat({
+                title: this.state.text
+            });
             this.setState({
-                text: newStr
+                text: '',
+                tasks: tasks
             });
         },
-        updateFontWeight: function () {
+        updateText(text){
             this.setState({
-                fontWeight: this.state.fontWeight === 'normal' ? 'bold' : 'normal'
+                text: text
             });
         },
-        updateFontStyle: function () {
+        updateTask(){
             this.setState({
-                fontStyle: this.state.fontStyle === 'normal' ? 'italic' : 'normal'
+                text: '',
+                tasks: tasks
             });
         },
-        render: function () {
+        render() {
             return (
                 <div>
-                    <Input updateText={this.updateText}/>
-                    <Checkbox title="bold" updateFont={this.updateFontWeight}/>
-                    <Checkbox title="italic" updateFont={this.updateFontStyle}/>
-                    <Output value={this.state.text}
-                            style={{fontWeight:this.state.fontWeight , fontStyle:this.state.fontStyle}}/>
+                    <Input text={this.state.text} addTask={this.addTask} updateText={this.updateText}/>
+                    <List tasks={this.state.tasks}/>
                 </div>
             );
         }
     });
 
     var Input = React.createClass({
-        onInputChange() {
+        onChange() {
             this.props.updateText(this.refs.input.value);
         },
         render() {
-            return <input ref="input" type="text" onChange={this.onInputChange}/>;
+            return (
+                <div>
+                    <span>Task:</span>
+                    <input ref="input" type="text" value={this.props.text} onChange={this.onChange}/>
+                    <button onClick={this.props.addTask}>Add</button>
+                </div>);
         }
     });
 
-    const Checkbox = props => <label><input type="checkbox" onChange={props.updateFont}/><span>{props.title}</span></label>;
+    var List = React.createClass({
+        render(){
+            return (
+                <ul> {
+                    _.map(this.props.tasks, function (task, index) {
+                        return <Task key={index} task={task}/>;
+                    })
+                }
+                </ul>
+            );
+        }
+    });
 
-    const Output = props => <div style={props.style}>{props.value}</div>;
+    var Task = React.createClass({
+        getInitialState() {
+            return {
+                isChecked: false
+            }
+        },
+        onTaskClick(){
+           this.setState({
+               isChecked: !this.state.isChecked
+           });
+        },
+        render(){
+            var style = this.state.isChecked ? 'line-through' : '';
+            return (
+                <li onClick={this.onTaskClick} ref="task" style={{textDecoration : style}}>
+                    {this.props.task.title}
+                </li>);
+        }
+    });
 
     ReactDOM.render(<App />, root);
 
