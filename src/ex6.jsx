@@ -9,22 +9,30 @@ requirejs.config({
 
 requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
 
-    //ex6 - without state
+    //ex6
     var root = document.getElementById('ex6');
     var Clock = React.createClass({
+        getInitialState: function () {
+            setInterval(this.updateTime, 1000);
+            return {
+                time: this.getTime()
+            };
+        },
+        updateTime: function () {
+            this.setState({
+                time: this.getTime()
+            });
+        },
         getTime: function () {
-            var date = this.props.time;
+            var date = new Date();
             return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
         },
         render: function () {
             return (
-                <span>{'Time is: ' + this.getTime()}</span>
+                <span>{'Time is: ' + this.state.time}</span>
             );
         }
     });
+    ReactDOM.render(<Clock/>, root);
 
-    setInterval(function () {
-        var date = new Date();
-        ReactDOM.render(<Clock time={date}/>, root);
-    }, 1000);
 });
