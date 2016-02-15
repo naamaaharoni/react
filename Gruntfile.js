@@ -17,6 +17,10 @@ module.exports = function (grunt) {
             css: {
                 files: ['styles/*.css'],
                 tasks: ['csslint']
+            },
+            babel: {
+                files: ['src/*.jsx'],
+                tasks: ['babel']
             }
         },
         babel: {
