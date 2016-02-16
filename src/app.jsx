@@ -20,9 +20,11 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
             }
         },
         addTask() {
-            var tasks = this.state.tasks.concat({
-                title: this.state.text
-            });
+            var task = {
+                title: this.state.text,
+                id: _.uniqueId()
+            };
+            var tasks = _.concat(task, this.state.tasks);
             this.setState({
                 text: '',
                 tasks: tasks
@@ -57,7 +59,7 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
             return (
                 <div>
                     <span>Task:</span>
-                    <input type="text" value={this.props.text} onChange={this.onChange}/>
+                    <input ref="input" type="text" value={this.props.text} onChange={this.onChange}/>
                     <button onClick={this.props.addTask}>Add</button>
                 </div>);
         }
@@ -67,8 +69,8 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
         render(){
             return (
                 <ul> {
-                    _.map(this.props.tasks, function (task, index) {
-                        return <Task key={index} task={task}/>;
+                    _.map(this.props.tasks, function (task) {
+                        return <Task key={task.id} task={task}/>;
                     })
                 }
                 </ul>
