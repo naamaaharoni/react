@@ -30,48 +30,47 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
                 tasks: tasks
             });
         },
-        removeTask(task){
-            var arr = _.without(this.state.tasks, task);
-            this.setState({
-                tasks: arr
-            });
-        },
         updateText(text){
             this.setState({
                 text: text
             });
         },
+        updateTask(){
+            this.setState({
+                text: '',
+                tasks: tasks
+            });
+        },
         render() {
             return (
                 <div>
-                    <Filter text={this.state.text} addTask={this.addTask} updateText={this.updateText}/>
-                    <FilteredList tasks={this.state.tasks} filter={this.state.text} removeTask={this.removeTask}/>
+                    <Input text={this.state.text} addTask={this.addTask} updateText={this.updateText}/>
+                    <List tasks={this.state.tasks}/>
                 </div>
             );
         }
     });
 
-    var Filter = React.createClass({
+    var Input = React.createClass({
         onChange() {
             this.props.updateText(this.refs.input.value);
         },
         render() {
             return (
                 <div>
-                    <span>Filter:</span>
+                    <span>Task:</span>
                     <input ref="input" type="text" value={this.props.text} onChange={this.onChange}/>
                     <button onClick={this.props.addTask}>Add</button>
                 </div>);
         }
     });
 
-    var FilteredList = React.createClass({
+    var List = React.createClass({
         render(){
-            var filteredTasks = _.filter(this.props.tasks, (task) => task.title.indexOf(this.props.filter) === 0);
             return (
                 <ul> {
-                    _.map(filteredTasks, (task) => {
-                        return <Task key={task.id} task={task} removeTask={this.props.removeTask}/>;
+                    _.map(this.props.tasks, function (task) {
+                        return <Task key={task.id} task={task}/>;
                     })
                 }
                 </ul>
@@ -90,15 +89,11 @@ requirejs(['lodash', 'react', 'reactDom'], function (_, React, ReactDOM) {
                 isChecked: !this.state.isChecked
             });
         },
-        onDeleteClick(){
-            this.props.removeTask(this.props.task);
-        },
         render(){
             var style = this.state.isChecked ? 'line-through' : '';
             return (
                 <li onClick={this.onTaskClick} style={{textDecoration : style}}>
-                    <div>{this.props.task.title}</div>
-                    <button onClick={this.onDeleteClick}>Delete</button>
+                    {this.props.task.title}
                 </li>);
         }
     });
