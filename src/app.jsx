@@ -6,177 +6,75 @@ requirejs.config({
         lodash: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min',
         react: 'https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-with-addons',
         reactDom: 'https://fb.me/react-dom-0.14.7',
-        reactRoute: 'https://cdnjs.cloudflare.com/ajax/libs/react-router/2.0.0/ReactRouter'
+        reactRoute: 'https://cdnjs.cloudflare.com/ajax/libs/react-router/2.0.0/ReactRouter',
+        jquery: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min'
+    },
+    shim: {
+        jquery: {exports: '$'}
     }
 });
 
-requirejs(['lodash', 'react', 'reactDom', 'reactRoute'], function (_, React, ReactDOM, ReactRouter) {
-
-    var Router = ReactRouter.Router;
-    var Route = ReactRouter.Route;
-    var History = ReactRouter.History;
-    var LinkedStateMixin = React.addons.LinkedStateMixin;
+requirejs(['lodash', 'react', 'reactDom', 'reactRoute', 'jquery'], function (_, React, ReactDOM, ReactRouter, $) {
 
     var root = document.getElementById('main');
 
-    var Login = React.createClass({
-        mixins: [LinkedStateMixin, History],
+    var App = React.createClass({
+        term: '',
         getInitialState(){
             return {
-                email: '',
-                password: '',
-                message: ''
+                results: []
             }
         },
-        verifyUser(){
-            var data = JSON.parse(localStorage.getItem('markbook'));
-            if (data != null) {
-                var password = data[this.state.email];
-                if (password && password === this.state.password) {
-                    this.history.push('/home');
-                }
-            }
+        updateResults(data){
+            var results = _.zipObject(data[1], data[3]);
             this.setState({
-                message: 'Email or password are incorrect'
+                results: results
             });
         },
-        goToSignup(){
-            this.history.push('/signup');
-        },
-        render () {
-            return (
-                <div>
-                    <Header />
-                    <form onSubmit={this.verifyUser}>
-                        <input type="email" placeholder="Email" valueLink={this.linkState('email')} className="input"
-                               required/>
-                        <input type="password" placeholder="Password" valueLink={this.linkState('password')}
-                               className="input" required/>
-                        <Error message={this.state.message}/>
-                        <input type="submit" value="Login" className="input"/>
-                    </form>
-                    <div>Don't have an account? <a onClick={this.goToSignup}>Sign up</a></div>
-                </div>
-            );
-        }
-    });
-
-    var Signup = React.createClass({
-        mixins: [LinkedStateMixin, History],
-        getInitialState(){
-            return {
-                email: '',
-                password: '',
-                rePassword: '',
-                message: ''
+        getResults(term){
+            if (term !== this.term) {
+                this.term = term;
+                this.getResultsThrottled(term);
             }
         },
-        checkIsNewUser(user){
-            var data = JSON.parse(localStorage.getItem('markbook'));
-            if (data != null) {
-                var password = data[this.state.email];
-                return _.isUndefined(password);
-            }
-            return true;
-        },
-        checkIsValidUser(){
-            var email = this.state.email;
-            var password = this.state.password;
-            var rePassword = this.state.rePassword;
-            var message = '';
-            if (!this.checkIsNewUser(email)) {
-                message = 'User already exists'
-            }
-            else if (password.length < 6) {
-                message = 'Password should be at least 6 characters long'
-            }
-            else if (password !== rePassword) {
-                message = 'Passwords do not match';
-            }
-            return message;
-        },
-        saveUserToLocalStorage(){
-            var data = JSON.parse(localStorage.getItem('markbook'));
-            data = data || {};
-            data[this.state.email] = this.state.password;
-            localStorage.setItem('markbook', JSON.stringify(data));
-        },
-        signUser(){
-            var message = this.checkIsValidUser();
-            if (message) {
-                this.setState({
-                    message: message
-                });
-            }
-            else {
-                this.saveUserToLocalStorage();
-                this.history.push('/home');
-            }
-        },
-        goToLogin(){
-            this.history.push('/');
-        },
-        render () {
-            return (
-                <div>
-                    <Header />
-                    <form onSubmit={this.signUser}>
-                        <input type="email" placeholder="Enter your email" valueLink={this.linkState('email')}
-                               className="input"
-                               required/>
-                        <input type="password" placeholder="Choose password" valueLink={this.linkState('password')}
-                               className="input"
-                               required/>
-                        <input type="password" placeholder="Repeat password" valueLink={this.linkState('rePassword')}
-                               className="input"
-                               required/>
-                        <Error message={this.state.message}/>
-                        <input type="submit" className="input" value="Create Account"/>
-                    </form>
-                    <div>Have an account? <a onClick={this.goToLogin}>Log in</a></div>
-                </div>
-
-            );
-        }
-    });
-
-    var Header = React.createClass({
-        render () {
-            return (
-                <div>
-                    <img src='./images/site_logo.png'/>
-                    <h1>MarkBook</h1>
-                </div>
-            );
-        }
-    });
-
-    var Error = React.createClass({
-        render(){
-            return <div className="error">{this.props.message}</div>
-        }
-    })
-
-    var Home = React.createClass({
-        mixins: [History],
-        goToLogin() {
-            this.history.push('/');
-        },
+        getResultsThrottled: _.throttle(function (term) {
+            term = encodeURIComponent(term);
+            var url = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&search=' + term + '&callback=?';
+            $.getJSON(url, this.updateResults);
+        }, 1000),
         render(){
             return (
-                <button onClick={this.goToLogin}>Log out</button>
-            );
+                <div>
+                    <Search getResults={this.getResults}/>
+                    <List items={this.state.results}/>
+                </div>
+            )
         }
     });
 
-    var routes = (
-        <Router>
-            <Route path="/" component={Login}/>
-            <Route path="/signup" component={Signup}/>
-            <Route path="/home" component={Home}/>
-        </Router>
-    )
+    var Search = React.createClass({
+        onChange(event){
+            this.props.getResults(event.target.value);
+        },
+        render(){
+            return <input type="text" onChange={this.onChange}/>
+        }
+    });
 
+    var List = React.createClass({
+        render: function () {
+            return <ul>{
+                _.map(this.props.items, function (value, key) {
+                    return <Result key={_.uniqueId()} link={value} term={key}/>
+                })
+            }</ul>;
+        }
+    });
+    var Result = React.createClass({
+        render: function () {
+            return <li><a target="_blank" href={this.props.link}>{this.props.term}</a></li>
+        }
+    });
 
-    ReactDOM.render(routes, root);
+    ReactDOM.render(<App />, root);
 });
