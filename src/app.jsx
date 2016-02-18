@@ -17,62 +17,93 @@ requirejs.config({
 requirejs(['lodash', 'react', 'reactDom', 'reactRoute', 'jquery'], function (_, React, ReactDOM, ReactRouter, $) {
 
     var root = document.getElementById('main');
+    var LinkedStateMixin = React.addons.LinkedStateMixin;
 
     var App = React.createClass({
-        term: '',
         getInitialState(){
             return {
-                results: []
+                tagNodes: [],
             }
         },
-        updateResults(data){
-            var results = _.zipObject(data[1], data[3]);
+        onTagInsert(newTag){
+            var tagNodes = _.concat(this.state.tagNodes, {
+                text: newTag,
+                status: 'active'
+            });
             this.setState({
-                results: results
+                tagNodes: tagNodes
             });
         },
-        getResults(term){
-            if (term !== this.term) {
-                this.term = term;
-                this.getResultsThrottled(term);
+        deleteLastTag(){
+            var tag = this.state.tagNodes[this.state.tagNodes.length - 1];
+            if (tag.status === 'active') {
+                tag.status = 'redayToDelete';
+                this.setState({
+                    tagNodes: this.state.tagNodes
+                });
+            }
+            else {
+                tag.status = 'active';
+                var tagNodes = _.slice(this.state.tagNodes, 0, -1);
+                this.setState({
+                    tagNodes: tagNodes
+                });
             }
         },
-        getResultsThrottled: _.throttle(function (term) {
-            term = encodeURIComponent(term);
-            var url = 'http://en.wikipedia.org/w/api.php?action=opensearch&format=json&search=' + term + '&callback=?';
-            $.getJSON(url, this.updateResults);
-        }, 1000),
-        render(){
+        render() {
             return (
-                <div>
-                    <Search getResults={this.getResults}/>
-                    <List items={this.state.results}/>
+                <div ref="tagsContainer">
+                    {_.map(this.state.tagNodes, function (tag, index) {
+                        return <Tag value={tag.text} status={tag.status} key={index}/>
+                    })}
+                    <TagInput onTagInsert={this.onTagInsert} deleteLastTag={this.deleteLastTag}/>
                 </div>
             )
+
         }
     });
 
-    var Search = React.createClass({
-        onChange(event){
-            this.props.getResults(event.target.value);
+    var TagInput = React.createClass({
+        mixins: [LinkedStateMixin],
+        getInitialState(){
+            return {
+                tagText: ''
+            }
+        },
+        onKeyDown(event){
+            var tagText = this.state.tagText;
+            if (event.keyCode === 13 || event.keyCode === 188) {
+                if(!_.isEmpty(tagText)) {
+                    this.props.onTagInsert(tagText);
+                    this.setState({
+                        tagText: ''
+                    });
+                }
+                event.preventDefault();
+            }
+            else if (event.keyCode === 8) {
+                if (_.isEmpty(tagText)) {
+                    this.props.deleteLastTag();
+                }
+            }
         },
         render(){
-            return <input type="text" onChange={this.onChange}/>
+            return (
+                <input type="text" onKeyDown={this.onKeyDown} valueLink={this.linkState('tagText')}/>
+            );
         }
     });
 
-    var List = React.createClass({
-        render: function () {
-            return <ul>{
-                _.map(this.props.items, function (value, key) {
-                    return <Result key={_.uniqueId()} link={value} term={key}/>
-                })
-            }</ul>;
-        }
-    });
-    var Result = React.createClass({
-        render: function () {
-            return <li><a target="_blank" href={this.props.link}>{this.props.term}</a></li>
+    var Tag = React.createClass({
+        render(){
+            var className = 'tag';
+            if (this.props.status === 'redayToDelete'){
+                className+= ' reday-to-delete';
+            }
+            return (
+                <span
+                    className={className}>{this.props.value}</span>
+            )
         }
     });
 
